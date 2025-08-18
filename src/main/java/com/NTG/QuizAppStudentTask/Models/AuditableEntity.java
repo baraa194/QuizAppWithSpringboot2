@@ -37,10 +37,21 @@ public abstract class AuditableEntity {
         createdAt = LocalDateTime.now();
         isActive = true;
         isDeleted = false;
+
+        if (createdBy == null) {
+            createdBy = getCurrentUserId();
+        }
+    }
+
+    private Integer getCurrentUserId() {
+        return 0;
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        if (createdBy == null) {
+            createdBy = getCurrentUserId();
+        }
     }
 }

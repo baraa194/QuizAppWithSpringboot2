@@ -7,9 +7,7 @@ import com.NTG.QuizAppStudentTask.Services.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,10 +18,12 @@ public class QuestionController {
     private QuestionService questionService;
 
     @GetMapping("{id}")
-    public ResponseEntity<List<QuestionDTO>> getAllQuestions(int id)
+    public ResponseEntity<List<QuestionDTO>> getAllQuestions(@PathVariable int id)
     {
         return new ResponseEntity<>(questionService.findQuesByquiz(id), HttpStatus.OK);
     }
+
+
 
 
 }
