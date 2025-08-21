@@ -29,7 +29,7 @@ public class Question extends AuditableEntity{
     @Column(length=500)
     private String OptionD ;
     @Column(length=5)
-    private String CorrectOption ;
+    private String CorrectOption;
     @Column(nullable=false)
     private int Grade ;
 
@@ -38,6 +38,7 @@ public class Question extends AuditableEntity{
         TRUE_FALSE,
         WRITTEN
     }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private QuestionType questionType;

@@ -19,7 +19,7 @@ public class Quiz extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int Id;
-    @Column(nullable = false, length = 10, unique = true)
+    @Column(nullable = false, length = 100, unique = true)
     private String title ;
     @Column( length = 500)
     private String description;

@@ -1,8 +1,11 @@
 package com.NTG.QuizAppStudentTask.Services;
-
 import com.NTG.QuizAppStudentTask.DTO.QuizDTO;
+import com.NTG.QuizAppStudentTask.DTO.QuizResultDTO;
 import com.NTG.QuizAppStudentTask.Models.Quiz;
+import com.NTG.QuizAppStudentTask.Models.Submission;
+import com.NTG.QuizAppStudentTask.Models.User;
 import com.NTG.QuizAppStudentTask.Repositories.QuizRepo;
+import com.NTG.QuizAppStudentTask.Repositories.userRepo;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,6 +21,7 @@ import java.util.stream.Collectors;
 public class QuizService {
 
    private final QuizRepo quizRepo;
+   private final userRepo userrepo;
 
     public List<QuizDTO> getAllWithStatus() {
 
@@ -41,7 +46,8 @@ public class QuizService {
                             quiz.getDescription(),
                             quiz.getStartTime(),
                             quiz.getEndTime(),
-                            status.name()
+                            status.name(),
+                            quiz.getCreatedBy()
                     );
                 })
                 .collect(Collectors.toList());
@@ -66,15 +72,106 @@ public class QuizService {
                 quiz.getDescription(),
                 quiz.getStartTime(),
                 quiz.getEndTime(),
-                status.name()
+                status.name(),
+                quiz.getCreatedBy()
 
         );
 
 
     }
 
-    public void AddQuizSubmission(QuizDTO quizDTO) {
+    public List<QuizResultDTO>  getAllResults() {
+     return quizRepo.findStudentQuizResults();
+    }
+
+    public QuizDTO getteacherQuizById(int id, int teacherId) {
+        Optional<QuizDTO> quiz = quizRepo.findByIdAndTeacherId(id, teacherId);
+        if (quiz.isPresent()) {
+            return quiz.get();
+        } else {
+            throw new RuntimeException("Quiz not found");
+        }
 
     }
+
+    //create quiz by teacher and admin
+    public QuizDTO createQuiz(QuizDTO quiz){
+
+        Quiz quiz2=new Quiz();
+        quiz2.setTitle(quiz.getTitle());
+        quiz2.setDescription(quiz.getDescription());
+        quiz2.setStartTime( quiz.getStartTime());
+        quiz2.setEndTime(quiz.getEndTime());
+        quiz2.setStatus(Quiz.Status.valueOf(quiz.getStatus()));
+
+
+        User user = userrepo.findById(quiz.getCreatedByUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        quiz2.setCreatedByUser(user);
+
+        quizRepo.save(quiz2);
+        return new QuizDTO(
+                 quiz2.getId(),
+                quiz2.getTitle(),
+                quiz2.getDescription(),
+                quiz2.getStartTime(),
+                quiz2.getEndTime(),
+                quiz2.getStatus().name(),
+                quiz2.getCreatedBy()
+        );
+    }
+
+    //teacher update in quiz by id
+    public QuizDTO updateQuiz(int quizId, QuizDTO quizDTO){
+
+        User user = userrepo.findById(1)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Quiz quiz=quizRepo.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        //ensure quiz is created by this teacher if quiz created by this teacher do update
+        //replace user with the current user
+        if(quiz.getCreatedByUser()==user){
+            quiz.setTitle(quizDTO.getTitle());
+            quiz.setDescription(quizDTO.getDescription());
+            quiz.setStartTime( quizDTO.getStartTime());
+            quiz.setEndTime(quizDTO.getEndTime());
+            quiz.setStatus(Quiz.Status.valueOf(quizDTO.getStatus()));
+            quiz.setCreatedByUser(user);
+            quiz.setUpdatedAt(LocalDateTime.now());
+            quiz.setUpdatedBy(1);
+            quizRepo.save(quiz);
+            return new QuizDTO(
+                    quiz.getId(),
+                    quiz.getTitle(),
+                    quiz.getDescription(),
+                    quiz.getStartTime(),
+                    quiz.getEndTime(),
+                    quiz.getStatus().name(),
+                    quiz.getCreatedBy()
+
+            );
+        }
+        else
+        {
+            throw new RuntimeException("NO quiz created by you with this id");
+        }
+
+    }
+
+    //teacher delete in quiz by id
+    public void deleteQuiz(int id) {
+        Quiz quiz = quizRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        // quizRepo.delete(quiz);
+        if (quiz.getIsDeleted() == false) {
+            quiz.setIsDeleted(true);
+            quizRepo.save(quiz);
+        }
+        else
+        {
+            throw new RuntimeException("this quiz is already deleted");
+        }
+    }
+
 
 }

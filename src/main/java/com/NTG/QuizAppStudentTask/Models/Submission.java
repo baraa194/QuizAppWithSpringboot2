@@ -14,18 +14,34 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Submission extends AuditableEntity{
-    public Submission() {
-        this.submittedAt = LocalDateTime.now();
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int Id;
-    @Column(nullable = false)
     private LocalDateTime submittedAt ;
     @Column(nullable = false)
     private float totalGrade=0;
+    @Column(nullable = false)
+    private boolean autoSubmitted = false;
+    @Column(nullable = false)
+    private LocalDateTime startedAt;
+
+
+    @Column(nullable = false)
+    private LocalDateTime deadline;
+
+
+    public enum Status
+    {
+        IN_PROGRESS,
+        COMPLETED,
+
+    }
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Submission.Status status;
 
     @ManyToOne
     @JoinColumn(name="student_id", nullable=false)
