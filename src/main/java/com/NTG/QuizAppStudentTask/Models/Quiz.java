@@ -1,5 +1,6 @@
 package com.NTG.QuizAppStudentTask.Models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,7 @@ public class Quiz extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int Id;
-    @Column(nullable = false, length = 10, unique = true)
+    @Column(nullable = false, length = 100, unique = true)
     private String title ;
     @Column( length = 500)
     private String description;
@@ -41,10 +42,11 @@ public class Quiz extends AuditableEntity {
     private User createdByUser;
 
 
+    @JsonManagedReference
     @OneToMany(mappedBy="quiz", cascade=CascadeType.ALL)
     private List<Question> questions;
 
-
+    @JsonManagedReference
     @OneToMany(mappedBy="quiz")
     private List<Submission> submissions;
 

@@ -1,5 +1,6 @@
 package com.NTG.QuizAppStudentTask.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +30,9 @@ public class Question extends AuditableEntity{
     @Column(length=500)
     private String OptionD ;
     @Column(length=5)
-    private String CorrectOption ;
+    private String CorrectOption;
+    @Column(length=500)
+    private String ModelAnswer;
     @Column(nullable=false)
     private int Grade ;
 
@@ -38,6 +41,7 @@ public class Question extends AuditableEntity{
         TRUE_FALSE,
         WRITTEN
     }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private QuestionType questionType;
@@ -45,6 +49,7 @@ public class Question extends AuditableEntity{
 
     @ManyToOne
     @JoinColumn(name="quiz_id", nullable=false)
+    @JsonBackReference
     private Quiz quiz;
 
 
