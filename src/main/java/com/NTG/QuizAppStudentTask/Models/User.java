@@ -84,4 +84,11 @@ public class User extends AuditableEntity implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")
+    private User teacher;
+
+    @OneToMany(mappedBy = "teacher")
+    private List<User> students;
 }
