@@ -7,7 +7,8 @@ import com.NTG.QuizAppStudentTask.Repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,8 +26,15 @@ public class SubmissionService {
     private final GradeWrittenAnswer gradingService;
 
     public void saveSubmission(SubmissionRequest subrequest) {
-        User student = userRepo.findById(subrequest.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String username = auth.getName();
+        User student = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Quiz quiz = quizRepo.findById(subrequest.getQuizId())
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
@@ -55,30 +63,35 @@ public class SubmissionService {
                 reqdto -> {
                     SubmissionAnswer subanswer = new SubmissionAnswer();
                     subanswer.setSubmission(submission);
-                    subanswer.setStudentAnswer(reqdto.getStudentaswer());
+                    subanswer.setStudentAnswer(reqdto.getStudentAnswer());
 
                     Question question = questionRepo.findById(reqdto.getQuestionid())
                             .orElseThrow(() -> new RuntimeException("Question not found"));
                     subanswer.setQuestion(question);
 
-                    //  Auto grading
+                    // Mcq grading
                     if (question.getQuestionType() == Question.QuestionType.MCQ ){
                         boolean isCorrect = question.getCorrectOption()
-                                .equalsIgnoreCase(reqdto.getStudentaswer());
+                                .equalsIgnoreCase(reqdto.getStudentAnswer());
                         subanswer.setCorrect(isCorrect);
-                        subanswer.setManualGrade(isCorrect ? question.getGrade() : 0);
-                    }// essay question
+                        subanswer.setGrade(isCorrect ? question.getGrade() : 0);
+                    }// written question
                     else if (question.getQuestionType() == Question.QuestionType.WRITTEN) {
-                        String studentAns = reqdto.getStudentaswer();
+
+                        String studentAns = reqdto.getStudentAnswer();
                         String modelAns = question.getModelAnswer();
                         try {
+                            System.out.println("StudentAns: " + studentAns);
+                            System.out.println("ModelAns: " + modelAns);
+                            System.out.println("QuestionGrade: " + question.getGrade());
                             double scorePercent = gradingService.gradeAnswer(studentAns, modelAns);
+                            System.out.println("ScorePercent: " + scorePercent);
                             float score = (float) ((scorePercent / 100.0) * question.getGrade());
-                            subanswer.setManualGrade(score);
+                            subanswer.setGrade(score);
                             subanswer.setCorrect(scorePercent >= 70);
                         }
                         catch (IOException e) {
-                            subanswer.setManualGrade(0);
+                            subanswer.setGrade(0);
                             subanswer.setCorrect(false);
                             e.printStackTrace();
                         }
@@ -91,16 +104,50 @@ public class SubmissionService {
         submission.setSubmissionAnswers(submissionAnswers);
 
         //  calculate total grade
-        float totalGrade = (float) submissionAnswers.stream()
-                .mapToDouble(SubmissionAnswer::getManualGrade)
+        float totalGrade = (int) submissionAnswers.stream()
+                .mapToDouble(SubmissionAnswer::getGrade)
                 .sum();
         submission.setTotalGrade(totalGrade);
         submissionRepo.save(submission);
-
     }
 
     public List<SubmissionSummaryDTO> findAllSubmissionsWithQuizID(int quizid) {
         return submissionRepo.findSubmissionsByQuizId(quizid);
+    }
+
+    //teacher can update manually
+    public void updateAnswerGrade(int studentId,int quizId,int questionId,float newGrade){
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//
+//        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+//            throw new RuntimeException("User not authenticated");
+//        }
+
+       // String username = auth.getName();
+        User student = userRepo.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("student not found"));
+
+        Quiz quiz =quizRepo.findById(quizId).orElseThrow(() -> new RuntimeException("quiz not found"));
+
+        Submission submission = submissionRepo.findByStudentAndQuiz(student,quiz)
+                .orElseThrow(() -> new RuntimeException("Submission not found"));
+
+
+        SubmissionAnswer submissionAnswer = submissionAnswerRepo
+                .findBySubmissionAndQuestionId(submission, (long)questionId)
+                .orElseThrow(() -> new RuntimeException("SubmissionAnswer not found for this question"));
+
+        submissionAnswer.setGrade(newGrade);
+        submissionAnswer.setCorrect(newGrade > 0);
+        submissionAnswerRepo.save(submissionAnswer);
+
+        float totalGrade = (float) submission.getSubmissionAnswers()
+                .stream()
+                .mapToDouble(SubmissionAnswer::getGrade)
+                .sum();
+        submission.setTotalGrade(totalGrade);
+
+        submissionRepo.save(submission);
     }
 }
 

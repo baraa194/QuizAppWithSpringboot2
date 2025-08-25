@@ -40,7 +40,7 @@ public class DataSeeder {
                 admin.setName("Super Admin");
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRole(adminRole);
-                admin.setCreatedBy(0);
+                admin.setCreatedBy("super");
                 // 3️⃣ خزّنه في الـ DB
                 UserRepo.save(admin);
 

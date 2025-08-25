@@ -10,6 +10,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.apache.lucene.util.BytesRef;
 import org.springframework.stereotype.Service;
+import org.apache.lucene.document.FieldType;
 
 import java.io.IOException;
 import java.util.*;
@@ -18,23 +19,22 @@ import java.util.*;
 public class GradeWrittenAnswer {
 
     public double gradeAnswer(String studentAnswer, String correctAnswer) throws IOException {
-        // Normalize النصوص
+
         String student = studentAnswer.toLowerCase().trim();
         String correct = correctAnswer.toLowerCase().trim();
 
-        // استخدم Lucene لتمثيل النصوص
         Analyzer analyzer = new StandardAnalyzer();
-//        RAMDirectory ramDirectory = new RAMDirectory();
+
         ByteBuffersDirectory ramDirectory = new ByteBuffersDirectory();
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
         IndexWriter writer = new IndexWriter(ramDirectory, config);
 
-        // أضف الإجابات كـ documents
+
         addDoc(writer, "text", student);
         addDoc(writer, "text", correct);
         writer.close();
 
-        // اقرأ الـ index
+
         DirectoryReader reader = DirectoryReader.open(ramDirectory);
         Terms terms1 = reader.getTermVector(0, "text");
         Terms terms2 = reader.getTermVector(1, "text");
@@ -44,13 +44,17 @@ public class GradeWrittenAnswer {
 
         reader.close();
 
-        // حساب Cosine Similarity
         return cosineSimilarity(tfidf1, tfidf2) * 100;
     }
 
     private void addDoc(IndexWriter writer, String fieldName, String text) throws IOException {
+        FieldType fieldType = new FieldType(TextField.TYPE_STORED);
+        fieldType.setStoreTermVectors(true);
+        fieldType.setStoreTermVectorPositions(true);
+        fieldType.setStoreTermVectorOffsets(true);
+
         Document doc = new Document();
-        doc.add(new TextField(fieldName, text, Field.Store.YES));
+        doc.add(new Field(fieldName, text, fieldType));
         writer.addDocument(doc);
     }
 
@@ -92,8 +96,11 @@ public class GradeWrittenAnswer {
             norm1 += v1 * v1;
             norm2 += v2 * v2;
         }
+        double dominator=Math.sqrt(norm1) * Math.sqrt(norm2);
+        if(dominator==0)
+            return 0;
 
-        return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+        return dotProduct / dominator;
     }
 }
 

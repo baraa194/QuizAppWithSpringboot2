@@ -12,7 +12,8 @@ import com.NTG.QuizAppStudentTask.Repositories.userRepo;
 import com.NTG.QuizAppStudentTask.Services.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -31,10 +32,15 @@ public class QuizAttemptService {
 
 //        if (quiz.getStatus() != Quiz.Status.IN_PROGRESS)
 //            throw new RuntimeException("Quiz is not active");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        User student = userrepo.findById(req.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new RuntimeException("User not authenticated");
+        }
 
+        String username = auth.getName();
+        User student = userrepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("student not found"));
 
         Optional<Submission> existingSubmission = submissionRepo.findByStudentAndQuiz(student, quiz);
 

@@ -100,8 +100,8 @@ public class QuizService {
         quiz2.setStartTime( quiz.getStartTime());
         quiz2.setEndTime(quiz.getEndTime());
         quiz2.setStatus(Quiz.Status.valueOf(quiz.getStatus()));
-        Optional<Integer> userIdOpt = auditorAwareImpl.getCurrentAuditor();
-        User user = userrepo.findById(userIdOpt.get())
+        Optional<String> userNameOpt = auditorAwareImpl.getCurrentAuditor();
+        User user = userrepo.findByUsername(userNameOpt.get())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         quiz2.setCreatedByUser(user);
@@ -130,7 +130,7 @@ public class QuizService {
             quiz.setEndTime(quizDTO.getEndTime());
             quiz.setStatus(Quiz.Status.valueOf(quizDTO.getStatus()));
             quiz.setUpdatedAt(LocalDateTime.now());
-            quiz.setUpdatedBy(1);
+           // quiz.setUpdatedBy(1);
             quizRepo.save(quiz);
 
             QuizDTO DTO=new QuizDTO();

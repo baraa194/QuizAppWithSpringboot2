@@ -35,9 +35,9 @@ public abstract class AuditableEntity {
 
     @CreatedBy
     @Column(name = "created_by")
-    private Integer createdBy;
+    private String createdBy;
 
     @LastModifiedBy
     @Column(name = "updated_by")
-    private Integer updatedBy;
+    private String updatedBy;
 }

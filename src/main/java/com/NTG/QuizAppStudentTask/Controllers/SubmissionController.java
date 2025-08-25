@@ -52,6 +52,15 @@ public class SubmissionController {
         return new ResponseEntity<>(subService.findAllSubmissionsWithQuizID(id), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
+    @PutMapping("td/submission/updateGrade/{studentId}/{quizId}/{questionid}/{newGrade}")
+    public ResponseEntity<?> updateAnswerGrade(@PathVariable int studentId,@PathVariable int quizId,@PathVariable int questionid,@PathVariable float newGrade){
+         subService.updateAnswerGrade(studentId,quizId,questionid,newGrade);
+         return ResponseEntity.ok("Submission grade updated successfully!");
+    }
+
+
+
 
 
 

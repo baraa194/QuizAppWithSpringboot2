@@ -32,7 +32,7 @@ public class SubmissionResultService {
             ansDTO.setQuestionText(a.getQuestion().getText());
             ansDTO.setStudentAnswer(a.getStudentAnswer());
             ansDTO.setCorrect(a.isCorrect());
-            ansDTO.setGrade(a.getManualGrade());
+            ansDTO.setGrade(a.getGrade());
             return ansDTO;
         }).toList();
 

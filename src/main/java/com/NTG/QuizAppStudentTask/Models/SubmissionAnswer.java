@@ -22,13 +22,12 @@ public class SubmissionAnswer extends  AuditableEntity {
     private String studentAnswer ;
     @Column(nullable = false)
     private boolean isCorrect ;
-    @Column(nullable = false)
-    private float manualGrade ;
-
+    @Column(name="manual_grade",nullable = false)
+    private float Grade ;
 
     @ManyToOne
     @JoinColumn(name="submission_id", nullable=false)
-    @JsonBackReference
+    @JsonIgnore
     private Submission submission;
 
 
