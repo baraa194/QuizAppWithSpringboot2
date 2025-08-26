@@ -39,6 +39,7 @@ public class SubmissionController {
 
     @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' , 'STUDENT')")
     @GetMapping("quiz/submissionresult/{id}")
+
     public ResponseEntity<?> getsubmissions(@PathVariable int id)
     {
         return new ResponseEntity<>(resultService.getSubmissionResult(id), HttpStatus.OK);
@@ -51,6 +52,7 @@ public class SubmissionController {
     {
         return new ResponseEntity<>(subService.findAllSubmissionsWithQuizID(id), HttpStatus.OK);
     }
+
 
     @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
     @PutMapping("td/submission/updateGrade/{studentId}/{quizId}/{questionid}/{newGrade}")

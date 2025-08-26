@@ -11,11 +11,13 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component("auditorAware")
+
 public class AuditorAwareImpl implements AuditorAware<String> {
     @Autowired
     private userRepo userRepository;
 
     @Override
+
     public Optional<String> getCurrentAuditor() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {

@@ -5,6 +5,11 @@ import com.NTG.QuizAppStudentTask.DTO.SubmissionSummaryDTO;
 import com.NTG.QuizAppStudentTask.Models.*;
 import com.NTG.QuizAppStudentTask.Repositories.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
@@ -13,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.io.IOException;
+
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +29,7 @@ public class SubmissionService {
     private final questionRepo questionRepo;
     private final QuizRepo quizRepo;
     private final userRepo userRepo;
+
     private final GradeWrittenAnswer gradingService;
 
     public void saveSubmission(SubmissionRequest subrequest) {
@@ -35,6 +42,7 @@ public class SubmissionService {
         String username = auth.getName();
         User student = userRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
 
         Quiz quiz = quizRepo.findById(subrequest.getQuizId())
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
@@ -64,10 +72,10 @@ public class SubmissionService {
                     SubmissionAnswer subanswer = new SubmissionAnswer();
                     subanswer.setSubmission(submission);
                     subanswer.setStudentAnswer(reqdto.getStudentAnswer());
-
                     Question question = questionRepo.findById(reqdto.getQuestionid())
                             .orElseThrow(() -> new RuntimeException("Question not found"));
                     subanswer.setQuestion(question);
+
 
                     // Mcq grading
                     if (question.getQuestionType() == Question.QuestionType.MCQ ){
@@ -104,6 +112,7 @@ public class SubmissionService {
         submission.setSubmissionAnswers(submissionAnswers);
 
         //  calculate total grade
+
         float totalGrade = (int) submissionAnswers.stream()
                 .mapToDouble(SubmissionAnswer::getGrade)
                 .sum();
@@ -149,6 +158,7 @@ public class SubmissionService {
 
         submissionRepo.save(submission);
     }
+
 }
 
 

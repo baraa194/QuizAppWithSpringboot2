@@ -21,7 +21,8 @@ public class QuizController {
 private  QuizService quizService;
 
     @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
-    @PostMapping("/td/create")
+
+    @PostMapping("/td/quiz/create")
     public ResponseEntity<QuizDTO> createQuiz(@RequestBody QuizDTO quiz){
         return new ResponseEntity<>(quizService.createQuiz(quiz), HttpStatus.CREATED);
     }
@@ -70,7 +71,6 @@ private  QuizService quizService;
     {
         return new ResponseEntity<>(quizService.getteacherQuizById(id,teacherid), HttpStatus.OK);
     }
-
 
 
 

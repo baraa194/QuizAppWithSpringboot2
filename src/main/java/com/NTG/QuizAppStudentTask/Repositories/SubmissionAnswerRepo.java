@@ -10,5 +10,4 @@ import java.util.Optional;
 
 public interface SubmissionAnswerRepo extends JpaRepository<SubmissionAnswer,Integer> {
     Optional<SubmissionAnswer> findBySubmissionAndQuestionId(Submission submission, Long questionId);
-
 }

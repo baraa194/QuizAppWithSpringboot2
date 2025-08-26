@@ -91,4 +91,5 @@ public class User extends AuditableEntity implements UserDetails {
 
     @OneToMany(mappedBy = "teacher")
     private List<User> students;
+
 }

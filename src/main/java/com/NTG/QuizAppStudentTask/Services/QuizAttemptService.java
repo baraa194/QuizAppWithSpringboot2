@@ -9,6 +9,11 @@ import com.NTG.QuizAppStudentTask.Models.User;
 import com.NTG.QuizAppStudentTask.Repositories.QuizRepo;
 import com.NTG.QuizAppStudentTask.Repositories.SubmissionRepo;
 import com.NTG.QuizAppStudentTask.Repositories.userRepo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 import com.NTG.QuizAppStudentTask.Services.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.LocalDateTime;
 import java.util.*;
 
+
 @Service
 @RequiredArgsConstructor
 
@@ -24,6 +30,7 @@ public class QuizAttemptService {
     private final QuizRepo quizrepo;
     private final userRepo userrepo;
     private final SubmissionRepo submissionRepo;
+
     private final QuestionService questionService;
 
     public startQuizResponseDTO startQuiz(StartQuizRequestDTO req) {

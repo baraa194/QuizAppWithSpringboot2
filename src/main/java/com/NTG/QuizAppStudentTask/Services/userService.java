@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-
 import java.util.Optional;
 
 @Service
@@ -83,4 +81,5 @@ public class userService {
 
         student.get().setTeacher(teacher.get());
     }
+
 }

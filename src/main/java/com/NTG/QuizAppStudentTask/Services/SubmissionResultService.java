@@ -1,7 +1,7 @@
 package com.NTG.QuizAppStudentTask.Services;
 
 import com.NTG.QuizAppStudentTask.DTO.SubmissionResponse;
-import com.NTG.QuizAppStudentTask.DTO.SubmissionAnswerResponse;
+import com.NTG.QuizAppStudentTask.DTO.submissionAnswerResponse;
 import com.NTG.QuizAppStudentTask.Models.Submission;
 import com.NTG.QuizAppStudentTask.Repositories.SubmissionRepo;
 import lombok.RequiredArgsConstructor;

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 @PreAuthorize("hasRole('ADMIN')")
 public class UserController {
     @Autowired
+
     private userService UserService;
 
     @PostMapping("/add")
@@ -38,7 +39,6 @@ public class UserController {
     public User updateStatus(@PathVariable int id, @RequestParam Status status) {
         return userService.updateStatus(id, status);
     }*/
-
 
     //assign student
     @PostMapping({"/assign"})

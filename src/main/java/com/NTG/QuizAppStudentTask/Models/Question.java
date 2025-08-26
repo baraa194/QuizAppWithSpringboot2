@@ -33,6 +33,7 @@ public class Question extends AuditableEntity{
     private String CorrectOption;
     @Column(length=500)
     private String ModelAnswer;
+
     @Column(nullable=false)
     private int Grade ;
 

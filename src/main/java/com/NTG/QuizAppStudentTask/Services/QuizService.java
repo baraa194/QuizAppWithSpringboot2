@@ -66,6 +66,7 @@ public class QuizService {
        else  {
             status = Quiz.Status.FINISHED;
        }
+
         QuizDTO DTO=new QuizDTO();
         DTO.setTitle(quiz.getTitle());
         DTO.setDescription(quiz.getDescription());
@@ -115,31 +116,78 @@ public class QuizService {
         return DTO;
     }
 
+
+    public List<QuizResultDTO>  getAllResults() {
+     return quizRepo.findStudentQuizResults();
+    }
+
+    public QuizDTO getteacherQuizById(int id, int teacherId) {
+        Optional<QuizDTO> quiz = quizRepo.findByIdAndTeacherId(id, teacherId);
+        if (quiz.isPresent()) {
+            return quiz.get();
+        } else {
+            throw new RuntimeException("Quiz not found");
+        }
+
+    }
+
+    //create quiz by teacher and admin
+    public QuizDTO createQuiz(QuizDTO quiz){
+
+        Quiz quiz2=new Quiz();
+        quiz2.setTitle(quiz.getTitle());
+        quiz2.setDescription(quiz.getDescription());
+        quiz2.setStartTime( quiz.getStartTime());
+        quiz2.setEndTime(quiz.getEndTime());
+        quiz2.setStatus(Quiz.Status.valueOf(quiz.getStatus()));
+
+
+        User user = userrepo.findById(quiz.getCreatedByUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        quiz2.setCreatedByUser(user);
+
+        quizRepo.save(quiz2);
+        return new QuizDTO(
+                 quiz2.getId(),
+                quiz2.getTitle(),
+                quiz2.getDescription(),
+                quiz2.getStartTime(),
+                quiz2.getEndTime(),
+                quiz2.getStatus().name(),
+                quiz2.getCreatedBy()
+        );
+    }
+
+  
     //teacher update in quiz by id
     public QuizDTO updateQuiz(int quizId, QuizDTO quizDTO){
-
 
         Quiz quiz=quizRepo.findById(quizId)
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
         //ensure quiz is created by this teacher if quiz created by this teacher do update
         //replace user with the current user
+
         if(quiz.getCreatedBy()==auditorAwareImpl.getCurrentAuditor().get()){
             quiz.setTitle(quizDTO.getTitle());
             quiz.setDescription(quizDTO.getDescription());
             quiz.setStartTime( quizDTO.getStartTime());
             quiz.setEndTime(quizDTO.getEndTime());
             quiz.setStatus(Quiz.Status.valueOf(quizDTO.getStatus()));
+            quiz.setCreatedByUser(user);
             quiz.setUpdatedAt(LocalDateTime.now());
-           // quiz.setUpdatedBy(1);
+            quiz.setUpdatedBy(1);
             quizRepo.save(quiz);
+            return new QuizDTO(
+                    quiz.getId(),
+                    quiz.getTitle(),
+                    quiz.getDescription(),
+                    quiz.getStartTime(),
+                    quiz.getEndTime(),
+                    quiz.getStatus().name(),
+                    quiz.getCreatedBy()
 
-            QuizDTO DTO=new QuizDTO();
-            DTO.setTitle(quiz.getTitle());
-            DTO.setDescription(quiz.getDescription());
-            DTO.setEndTime(quiz.getEndTime());
-            DTO.setStartTime(quiz.getStartTime());
-            DTO.setStatus( quiz.getStatus().name());
-           return DTO;
+            );
+
         }
         else
         {
