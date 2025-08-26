@@ -22,8 +22,12 @@ public class SubmissionAnswer extends  AuditableEntity {
     private String studentAnswer ;
     @Column(nullable = false)
     private boolean isCorrect ;
-    @Column(name="manual_grade",nullable = false)
-    private float Grade ;
+
+    @Column(nullable = false)
+    private float manualGrade ;
+    @Column(name="selected_option_id")
+    private int selectedOptionId;
+
 
     @ManyToOne
     @JoinColumn(name="submission_id", nullable=false)

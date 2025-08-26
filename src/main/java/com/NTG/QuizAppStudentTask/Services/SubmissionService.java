@@ -30,6 +30,7 @@ public class SubmissionService {
     private final QuizRepo quizRepo;
     private final userRepo userRepo;
 
+
     private final GradeWrittenAnswer gradingService;
 
     public void saveSubmission(SubmissionRequest subrequest) {
@@ -47,40 +48,35 @@ public class SubmissionService {
         Quiz quiz = quizRepo.findById(subrequest.getQuizId())
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
 
-     // get the submission
         Submission submission = submissionRepo
                 .findByStudentAndQuiz(student, quiz)
                 .orElseThrow(() -> new RuntimeException("Submission not started for this quiz"));
-
 
         if (submission.getStatus() == Submission.Status.COMPLETED) {
             throw new RuntimeException("You have already submitted this quiz");
         }
 
-        // ⏳ deadline check
         if (quiz.getEndTime() != null && LocalDateTime.now().isAfter(quiz.getEndTime())) {
             throw new RuntimeException("Quiz time has ended, submission not allowed");
         }
 
-        //  set submittedAt & status to COMPLETED
         submission.setSubmittedAt(LocalDateTime.now());
         submission.setStatus(Submission.Status.COMPLETED);
 
-        // build submission answers
         List<SubmissionAnswer> submissionAnswers = subrequest.getAnswers().stream().map(
                 reqdto -> {
                     SubmissionAnswer subanswer = new SubmissionAnswer();
                     subanswer.setSubmission(submission);
                     subanswer.setStudentAnswer(reqdto.getStudentAnswer());
-                    Question question = questionRepo.findById(reqdto.getQuestionid())
+                    Question question = questionRepo.findById(reqdto.getQuestionId())
                             .orElseThrow(() -> new RuntimeException("Question not found"));
                     subanswer.setQuestion(question);
 
+                    // Auto grading based on options
+                    if (question.getOptions() != null && !question.getOptions().isEmpty()) {
+                        boolean isCorrect = question.getOptions().stream()
+                                .anyMatch(opt -> opt.isCorrect() && opt.getId() == reqdto.getSelectedOptionId());
 
-                    // Mcq grading
-                    if (question.getQuestionType() == Question.QuestionType.MCQ ){
-                        boolean isCorrect = question.getCorrectOption()
-                                .equalsIgnoreCase(reqdto.getStudentAnswer());
                         subanswer.setCorrect(isCorrect);
                         subanswer.setGrade(isCorrect ? question.getGrade() : 0);
                     }// written question
@@ -119,6 +115,7 @@ public class SubmissionService {
         submission.setTotalGrade(totalGrade);
         submissionRepo.save(submission);
     }
+
 
     public List<SubmissionSummaryDTO> findAllSubmissionsWithQuizID(int quizid) {
         return submissionRepo.findSubmissionsByQuizId(quizid);

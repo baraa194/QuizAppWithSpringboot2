@@ -15,11 +15,7 @@ import java.util.List;
 public class QuestionDTO {
    // private int Id;
     private String  text ;
-    private String OptionA ;
-    private String OptionB;
-    private String OptionC ;
-    private String OptionD ;
-    private String CorrectOption ;
+    private List<OptionDTO> options;
     private String type; // MCQ / TrueFalse / Written
     private int Grade ;
     private String ModelAnswer;

@@ -1,15 +1,19 @@
 package com.NTG.QuizAppStudentTask.Services;
+import com.NTG.QuizAppStudentTask.DTO.QuestionDTO;
 import com.NTG.QuizAppStudentTask.DTO.QuizDTO;
 import com.NTG.QuizAppStudentTask.DTO.QuizResultDTO;
-import com.NTG.QuizAppStudentTask.Models.Quiz;
-import com.NTG.QuizAppStudentTask.Models.Submission;
-import com.NTG.QuizAppStudentTask.Models.User;
+import com.NTG.QuizAppStudentTask.DTO.QuizWithquestionsDTO;
+import com.NTG.QuizAppStudentTask.Models.*;
 import com.NTG.QuizAppStudentTask.Repositories.QuizRepo;
+import com.NTG.QuizAppStudentTask.Repositories.questionRepo;
 import com.NTG.QuizAppStudentTask.Repositories.userRepo;
 import com.NTG.QuizAppStudentTask.Config.AuditorAwareImpl;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,7 +27,9 @@ public class QuizService {
 
    private final QuizRepo quizRepo;
    private final userRepo userrepo;
+   private final questionRepo questionRepo;
   private final AuditorAwareImpl auditorAwareImpl;
+
 
     public List<QuizDTO> getAllWithStatus() {
 
@@ -130,35 +136,62 @@ public class QuizService {
         }
 
     }
+    public void createQuizWithQuestions(QuizWithquestionsDTO dto) {
 
-    //create quiz by teacher and admin
-    public QuizDTO createQuiz(QuizDTO quiz){
+        // Get current authenticated user
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = auth.getPrincipal();
 
-        Quiz quiz2=new Quiz();
-        quiz2.setTitle(quiz.getTitle());
-        quiz2.setDescription(quiz.getDescription());
-        quiz2.setStartTime( quiz.getStartTime());
-        quiz2.setEndTime(quiz.getEndTime());
-        quiz2.setStatus(Quiz.Status.valueOf(quiz.getStatus()));
+        String username = (principal instanceof UserDetails)
+                ? ((UserDetails) principal).getUsername()
+                : principal.toString();
 
-
-        User user = userrepo.findById(quiz.getCreatedByUserId())
+        User user = userrepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        quiz2.setCreatedByUser(user);
 
-        quizRepo.save(quiz2);
-        return new QuizDTO(
-                 quiz2.getId(),
-                quiz2.getTitle(),
-                quiz2.getDescription(),
-                quiz2.getStartTime(),
-                quiz2.getEndTime(),
-                quiz2.getStatus().name(),
-                quiz2.getCreatedBy()
-        );
+        // Calculate end time based on start time + duration
+        LocalDateTime endTime = dto.getStartTime().plusMinutes(dto.getDuration());
+
+        // Create Quiz entity
+        Quiz quiz = new Quiz();
+        quiz.setTitle(dto.getTitle());
+        quiz.setDescription(dto.getDescription());
+        quiz.setStartTime(dto.getStartTime());
+        quiz.setEndTime(endTime);
+        quiz.setStatus(dto.getStatus() == null
+                ? Quiz.Status.SCHEDULED
+                : Quiz.Status.valueOf(dto.getStatus()));
+        quiz.setCreatedByUser(user);
+
+        quizRepo.save(quiz);
+
+        // Create questions with options
+        if (dto.getQuestions() != null) {
+            for (QuestionDTO qDto : dto.getQuestions()) {
+                Question question = new Question();
+                question.setText(qDto.getText());
+                question.setGrade(qDto.getGrade());
+                question.setQuestionType(Question.QuestionType.valueOf(qDto.getType().toUpperCase()));
+                question.setQuiz(quiz);
+
+                // Map OptionDTOs to Option entities
+                List<Option> options = qDto.getOptions().stream()
+                        .map(optDto -> {
+                            Option opt = new Option();
+                            opt.setAnswer(optDto.getAnswer());  // النص الفعلي للإجابة
+                            opt.setCorrect(optDto.isCorrect()); // هل هذه الإجابة صحيحة
+                            opt.setQuestion(question);
+                            return opt;
+                        }).collect(Collectors.toList());
+
+                question.setOptions(options);
+
+                questionRepo.save(question);
+            }
+        }
     }
 
-  
+
     //teacher update in quiz by id
     public QuizDTO updateQuiz(int quizId, QuizDTO quizDTO){
 

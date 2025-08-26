@@ -49,7 +49,15 @@ public class AuthController {
             if (user != null) {
                 // Generate JWT token
                 String token = jwtService.generateToken(user);
-                return ResponseEntity.ok(new AuthResponse(token));
+
+                // 🟢 استخرج الـ role (لو UserDetailsImpl عندك فيه roleId أو roleName)
+                String role = user.getAuthorities()
+                        .stream()
+                        .findFirst()
+                        .map(auth -> auth.getAuthority())
+                        .orElse("UNKNOWN");
+
+                return ResponseEntity.ok(new AuthResponse(token, role));
             }
 
             return ResponseEntity.status(400).body("User not found");
@@ -60,5 +68,6 @@ public class AuthController {
             return ResponseEntity.status(500).body("Authentication error: " + e.getMessage());
         }
     }
+
 
 }

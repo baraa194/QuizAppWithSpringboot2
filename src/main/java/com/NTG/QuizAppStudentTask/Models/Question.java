@@ -21,18 +21,6 @@ public class Question extends AuditableEntity{
     private int Id;
     @Column(name="ques_text", length=500)
     private String  text ;
-   @Column(length=500)
-    private String OptionA ;
-    @Column(length=500)
-    private String OptionB;
-    @Column(length=500)
-    private String OptionC ;
-    @Column(length=500)
-    private String OptionD ;
-    @Column(length=5)
-    private String CorrectOption;
-    @Column(length=500)
-    private String ModelAnswer;
 
     @Column(nullable=false)
     private int Grade ;
@@ -47,6 +35,8 @@ public class Question extends AuditableEntity{
     @Column(nullable = false, length = 30)
     private QuestionType questionType;
 
+    @OneToMany(mappedBy="question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Option> options;
 
     @ManyToOne
     @JoinColumn(name="quiz_id", nullable=false)
