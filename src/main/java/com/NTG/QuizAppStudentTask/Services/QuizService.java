@@ -161,6 +161,7 @@ public class QuizService {
                 question.setGrade(qDto.getGrade());
                 question.setQuestionType(Question.QuestionType.valueOf(qDto.getType().toUpperCase()));
                 question.setQuiz(quiz);
+                question.setModelAnswer(dto.getModelAnswer());
 
                 // Map OptionDTOs to Option entities
                 List<Option> options = qDto.getOptions().stream()

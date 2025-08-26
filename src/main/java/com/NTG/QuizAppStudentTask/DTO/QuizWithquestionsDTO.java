@@ -15,6 +15,7 @@ public class QuizWithquestionsDTO {
         private LocalDateTime startTime;
         private Long duration;
         private String status;
+        private String modelAnswer;
         private List<QuestionDTO> questions;
 
 
