@@ -22,5 +22,6 @@ public class QuestionDTO {
     private String CorrectOption ;
     private String type; // MCQ / TrueFalse / Written
     private int Grade ;
+    private String ModelAnswer;
 
 }

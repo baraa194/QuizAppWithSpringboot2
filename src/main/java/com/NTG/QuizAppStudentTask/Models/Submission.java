@@ -1,5 +1,7 @@
 package com.NTG.QuizAppStudentTask.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,11 +51,13 @@ public class Submission extends AuditableEntity{
 
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name="quiz_id", nullable=false)
     private Quiz quiz;
 
 
     @OneToMany(mappedBy="submission", cascade=CascadeType.ALL)
+    @JsonManagedReference
     private List<SubmissionAnswer> submissionAnswers;
 
 

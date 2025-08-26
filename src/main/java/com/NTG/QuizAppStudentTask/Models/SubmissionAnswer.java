@@ -1,5 +1,7 @@
 package com.NTG.QuizAppStudentTask.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,18 +22,19 @@ public class SubmissionAnswer extends  AuditableEntity {
     private String studentAnswer ;
     @Column(nullable = false)
     private boolean isCorrect ;
-    @Column(nullable = false)
-    private float manualGrade ;
-
-
+    @Column(name="manual_grade",nullable = false)
+    private float Grade ;
 
     @ManyToOne
     @JoinColumn(name="submission_id", nullable=false)
+    @JsonIgnore
     private Submission submission;
 
 
     @ManyToOne
     @JoinColumn(name="question_id", nullable=false)
     private Question question;
+
+
 
 }

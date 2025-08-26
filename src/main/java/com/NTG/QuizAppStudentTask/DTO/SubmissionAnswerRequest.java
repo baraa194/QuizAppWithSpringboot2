@@ -10,6 +10,7 @@ import lombok.Setter;
 public class SubmissionAnswerRequest {
 
     private int questionid;
-    private String studentaswer;
+    private String studentAnswer;
+
 
 }

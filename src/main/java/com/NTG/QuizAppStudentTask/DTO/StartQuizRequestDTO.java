@@ -8,6 +8,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class StartQuizRequestDTO {
     private int quizId;
-    private int studentId;
 
 }

@@ -2,6 +2,7 @@ package com.NTG.QuizAppStudentTask.Services;
 
 import com.NTG.QuizAppStudentTask.DTO.StartQuizRequestDTO;
 import com.NTG.QuizAppStudentTask.DTO.startQuizResponseDTO;
+import com.NTG.QuizAppStudentTask.DTO.QuestionStudentDTO;
 import com.NTG.QuizAppStudentTask.Models.Quiz;
 import com.NTG.QuizAppStudentTask.Models.Submission;
 import com.NTG.QuizAppStudentTask.Models.User;
@@ -13,6 +14,14 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import com.NTG.QuizAppStudentTask.Services.QuestionService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.time.LocalDateTime;
+import java.util.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -22,16 +31,23 @@ public class QuizAttemptService {
     private final userRepo userrepo;
     private final SubmissionRepo submissionRepo;
 
+    private final QuestionService questionService;
+
     public startQuizResponseDTO startQuiz(StartQuizRequestDTO req) {
         Quiz quiz = quizrepo.findById(req.getQuizId())
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
 
-        if (quiz.getStatus() != Quiz.Status.IN_PROGRESS)
-            throw new RuntimeException("Quiz is not active");
+//        if (quiz.getStatus() != Quiz.Status.IN_PROGRESS)
+//            throw new RuntimeException("Quiz is not active");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        User student = userrepo.findById(req.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new RuntimeException("User not authenticated");
+        }
 
+        String username = auth.getName();
+        User student = userrepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("student not found"));
 
         Optional<Submission> existingSubmission = submissionRepo.findByStudentAndQuiz(student, quiz);
 
@@ -41,10 +57,13 @@ public class QuizAttemptService {
                 throw new RuntimeException("You have already completed this quiz");
             }
 
+            List<QuestionStudentDTO> questions = questionService.findQuesForStudent(quiz.getId());
+
             return new startQuizResponseDTO(
                     submission.getId(),
                     submission.getDeadline(),
-                    quiz.getTitle()
+                    quiz.getTitle(),
+                    questions
             );
         }
 
@@ -61,10 +80,18 @@ public class QuizAttemptService {
         sub.setStartedAt(now);
         sub.setDeadline(deadline);
         sub.setStatus(Submission.Status.IN_PROGRESS);
-
+        sub.setSubmittedAt(LocalDateTime.now());
         sub = submissionRepo.save(sub);
 
-        return new startQuizResponseDTO(sub.getId(), sub.getDeadline(), quiz.getTitle());
+
+        List<QuestionStudentDTO> questions = questionService.findQuesForStudent(quiz.getId());
+
+        return new startQuizResponseDTO(
+                sub.getId(),
+                sub.getDeadline(),
+                quiz.getTitle(),
+                questions
+        );
     }
 
 

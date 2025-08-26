@@ -11,7 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class SubmissionRequest {
 
-    private int studentId;
     private int quizId;
     private List<SubmissionAnswerRequest> answers;
 

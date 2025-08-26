@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -65,4 +66,20 @@ public class userService {
         existing.setStatus(status);
         return userRepo.save(existing);
     }*/
+
+    //assign student
+    public void assignStudentToTeacher(int studentId, int teacherId) {
+        Optional<User> student = userRepo.findById(studentId);
+        Optional<User> teacher = userRepo.findById(teacherId);
+
+        if (!student.get().getRole().getRole().equalsIgnoreCase("ROLE_STUDENT")) {
+            throw new RuntimeException("This user is not a student!");
+        }
+        if (!teacher.get().getRole().getRole().equalsIgnoreCase("ROLE_TEACHER")) {
+            throw new RuntimeException("This user is not a teacher!");
+        }
+
+        student.get().setTeacher(teacher.get());
+    }
+
 }

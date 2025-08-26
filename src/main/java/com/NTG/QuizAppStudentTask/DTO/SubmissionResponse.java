@@ -16,5 +16,6 @@ public class SubmissionResponse {
     private int quizId;
     private String quizTitle;
     private float totalGrade;
-    private List<submissionAnswerResponse> answers;
+    private List<SubmissionAnswerResponse> answers;
+
 }
