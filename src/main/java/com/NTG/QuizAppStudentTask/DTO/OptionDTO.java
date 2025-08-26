@@ -2,19 +2,15 @@ package com.NTG.QuizAppStudentTask.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
 @AllArgsConstructor
-public class SubmissionAnswerRequest {
+@NoArgsConstructor
+public class OptionDTO {
 
-      private int questionId;
-      private int selectedOptionId;
-      private String studentAnswer;
-
-
-
-
-
+    private boolean isCorrect;
+    private String answer;
 }

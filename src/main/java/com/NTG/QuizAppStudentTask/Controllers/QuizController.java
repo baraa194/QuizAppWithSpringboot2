@@ -2,6 +2,7 @@ package com.NTG.QuizAppStudentTask.Controllers;
 
 
 import com.NTG.QuizAppStudentTask.DTO.QuizDTO;
+import com.NTG.QuizAppStudentTask.DTO.QuizWithquestionsDTO;
 import com.NTG.QuizAppStudentTask.Models.Quiz;
 import com.NTG.QuizAppStudentTask.Services.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,9 @@ private  QuizService quizService;
 
     @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
     @PostMapping("/td/quiz/create")
-    public ResponseEntity<QuizDTO> createQuiz(@RequestBody QuizDTO quiz){
-        return new ResponseEntity<>(quizService.createQuiz(quiz), HttpStatus.CREATED);
+    public void createQuiz(@RequestBody QuizWithquestionsDTO quiz){
+
+       quizService.createQuizWithQuestions(quiz);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")

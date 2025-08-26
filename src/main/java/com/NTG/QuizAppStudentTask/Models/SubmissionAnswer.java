@@ -22,7 +22,8 @@ public class SubmissionAnswer extends  AuditableEntity {
     private boolean isCorrect ;
     @Column(nullable = false)
     private float manualGrade ;
-
+    @Column(name="selected_option_id")
+    private int selectedOptionId;
 
 
     @ManyToOne

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 @Service
 public class JwtService {
@@ -26,29 +28,45 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
-    // توليد التوكن
+    // ✅ توليد التوكن مع إضافة الـ role
     public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        // نفترض أن اليوزر ليه role واحد
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        claims.put("role", role); // ROLE_ADMIN or ROLE_TEACHER or ROLE_STUDENT
+
         return Jwts.builder()
-                .setSubject(userDetails.getUsername()) // بيحط الـ username
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername()) // username
                 .setIssuedAt(new Date(System.currentTimeMillis())) // تاريخ الإصدار
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // ساعة صلاحية
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // التوقيع بالمفتاح
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // ساعة
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // استخراج الـ username من التوكن
+    // ✅ استخراج الـ username من التوكن
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    // ✅ استخراج الـ role من التوكن
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
+
     // استخراج claim معين
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = Jwts.parserBuilder()
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    // ✅ استرجاع كل الـ claims
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claimsResolver.apply(claims);
     }
 
     // التحقق من صلاحية التوكن
@@ -62,3 +80,4 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 }
+
