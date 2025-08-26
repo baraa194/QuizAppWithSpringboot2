@@ -13,8 +13,4 @@ public class SubmissionAnswerRequest {
       private int selectedOptionId;
       private String studentAnswer;
 
-
-
-
-
 }

@@ -7,6 +7,7 @@ import com.NTG.QuizAppStudentTask.Models.*;
 import com.NTG.QuizAppStudentTask.Repositories.QuizRepo;
 import com.NTG.QuizAppStudentTask.Repositories.questionRepo;
 import com.NTG.QuizAppStudentTask.Repositories.userRepo;
+import com.NTG.QuizAppStudentTask.Config.AuditorAwareImpl;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,8 @@ public class QuizService {
    private final QuizRepo quizRepo;
    private final userRepo userrepo;
    private final questionRepo questionRepo;
+  private final AuditorAwareImpl auditorAwareImpl;
+
 
     public List<QuizDTO> getAllWithStatus() {
 
@@ -45,15 +48,13 @@ public class QuizService {
                         status = Quiz.Status.FINISHED;
                     }
 
-                    return new QuizDTO(
-                            quiz.getId(),
-                            quiz.getTitle(),
-                            quiz.getDescription(),
-                            quiz.getStartTime(),
-                            quiz.getEndTime(),
-                            status.name(),
-                            quiz.getCreatedBy()
-                    );
+                    QuizDTO DTO=new QuizDTO();
+                    DTO.setTitle(quiz.getTitle());
+                    DTO.setDescription(quiz.getDescription());
+                    DTO.setEndTime(quiz.getEndTime());
+                    DTO.setStartTime(quiz.getStartTime());
+                    DTO.setStatus( quiz.getStatus().name());
+                    return DTO;
                 })
                 .collect(Collectors.toList());
     }
@@ -71,19 +72,56 @@ public class QuizService {
        else  {
             status = Quiz.Status.FINISHED;
        }
-        return new QuizDTO(
-                quiz.getId(),
-                quiz.getTitle(),
-                quiz.getDescription(),
-                quiz.getStartTime(),
-                quiz.getEndTime(),
-                status.name(),
-                quiz.getCreatedBy()
 
-        );
-
+        QuizDTO DTO=new QuizDTO();
+        DTO.setTitle(quiz.getTitle());
+        DTO.setDescription(quiz.getDescription());
+        DTO.setEndTime(quiz.getEndTime());
+        DTO.setStartTime(quiz.getStartTime());
+        DTO.setStatus( quiz.getStatus().name());
+        return DTO;
 
     }
+
+    public List<QuizResultDTO>  getAllResults() {
+     return quizRepo.findStudentQuizResults();
+    }
+
+    public QuizDTO getteacherQuizById(int id, int teacherId) {
+        Optional<QuizDTO> quiz = quizRepo.findByIdAndTeacherId(id, teacherId);
+        if (quiz.isPresent()) {
+            return quiz.get();
+        } else {
+            throw new RuntimeException("Quiz not found");
+        }
+
+    }
+
+    //create quiz by teacher and admin
+    public QuizDTO createQuiz(QuizDTO quiz){
+
+
+        Quiz quiz2=new Quiz();
+        quiz2.setTitle(quiz.getTitle());
+        quiz2.setDescription(quiz.getDescription());
+        quiz2.setStartTime( quiz.getStartTime());
+        quiz2.setEndTime(quiz.getEndTime());
+        quiz2.setStatus(Quiz.Status.valueOf(quiz.getStatus()));
+        Optional<String> userNameOpt = auditorAwareImpl.getCurrentAuditor();
+        User user = userrepo.findByUsername(userNameOpt.get())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        quiz2.setCreatedByUser(user);
+        quizRepo.save(quiz2);
+        QuizDTO DTO=new QuizDTO();
+        DTO.setTitle(quiz2.getTitle());
+        DTO.setDescription(quiz2.getDescription());
+        DTO.setEndTime(quiz2.getEndTime());
+        DTO.setStartTime(quiz2.getStartTime());
+        DTO.setStatus( quiz2.getStatus().name());
+        return DTO;
+    }
+
 
     public List<QuizResultDTO>  getAllResults() {
      return quizRepo.findStudentQuizResults();
@@ -154,17 +192,15 @@ public class QuizService {
     }
 
 
-
     //teacher update in quiz by id
     public QuizDTO updateQuiz(int quizId, QuizDTO quizDTO){
 
-        User user = userrepo.findById(1)
-                .orElseThrow(() -> new RuntimeException("User not found"));
         Quiz quiz=quizRepo.findById(quizId)
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
         //ensure quiz is created by this teacher if quiz created by this teacher do update
         //replace user with the current user
-        if(quiz.getCreatedByUser()==user){
+
+        if(quiz.getCreatedBy()==auditorAwareImpl.getCurrentAuditor().get()){
             quiz.setTitle(quizDTO.getTitle());
             quiz.setDescription(quizDTO.getDescription());
             quiz.setStartTime( quizDTO.getStartTime());
@@ -184,6 +220,7 @@ public class QuizService {
                     quiz.getCreatedBy()
 
             );
+
         }
         else
         {

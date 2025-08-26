@@ -83,7 +83,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/teacher/**").hasRole("TEACHER")
                         .requestMatchers("/student/**").hasRole("STUDENT")
-                        .requestMatchers("/td/**").hasAnyRole("ADMIN", "TEACHER")
+                        .requestMatchers("/quiz/td/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers("/quiz/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -95,6 +95,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }
 
 

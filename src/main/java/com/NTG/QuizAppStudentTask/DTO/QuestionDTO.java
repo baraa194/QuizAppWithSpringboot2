@@ -18,5 +18,6 @@ public class QuestionDTO {
     private List<OptionDTO> options;
     private String type; // MCQ / TrueFalse / Written
     private int Grade ;
+    private String ModelAnswer;
 
 }

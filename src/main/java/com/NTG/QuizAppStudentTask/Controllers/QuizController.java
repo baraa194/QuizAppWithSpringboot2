@@ -22,6 +22,7 @@ public class QuizController {
 private  QuizService quizService;
 
     @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
+
     @PostMapping("/td/quiz/create")
     public void createQuiz(@RequestBody QuizWithquestionsDTO quiz){
 

@@ -26,13 +26,13 @@ public class SubmissionResultService {
         resultDTO.setQuizTitle(sub.getQuiz().getTitle());
         resultDTO.setTotalGrade(sub.getTotalGrade());
 
-        List<submissionAnswerResponse> answers = sub.getSubmissionAnswers().stream().map(a -> {
-            submissionAnswerResponse ansDTO = new submissionAnswerResponse();
+        List<SubmissionAnswerResponse> answers = sub.getSubmissionAnswers().stream().map(a -> {
+            SubmissionAnswerResponse ansDTO = new SubmissionAnswerResponse();
             ansDTO.setQuestionId(a.getQuestion().getId());
             ansDTO.setQuestionText(a.getQuestion().getText());
             ansDTO.setStudentAnswer(a.getStudentAnswer());
             ansDTO.setCorrect(a.isCorrect());
-            ansDTO.setGrade(a.getManualGrade());
+            ansDTO.setGrade(a.getGrade());
             return ansDTO;
         }).toList();
 
