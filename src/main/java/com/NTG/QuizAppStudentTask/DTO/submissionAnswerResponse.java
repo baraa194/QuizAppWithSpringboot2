@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class submissionAnswerResponse {
+public class SubmissionAnswerResponse {
 
         private int questionId;
         private String studentAnswer;

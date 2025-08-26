@@ -1,7 +1,7 @@
 package com.NTG.QuizAppStudentTask.Services;
 
 import com.NTG.QuizAppStudentTask.DTO.SubmissionResponse;
-import com.NTG.QuizAppStudentTask.DTO.submissionAnswerResponse;
+import com.NTG.QuizAppStudentTask.DTO.SubmissionAnswerResponse;
 import com.NTG.QuizAppStudentTask.Models.Submission;
 import com.NTG.QuizAppStudentTask.Repositories.SubmissionRepo;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class SubmissionResultService {
             ansDTO.setQuestionText(a.getQuestion().getText());
             ansDTO.setStudentAnswer(a.getStudentAnswer());
             ansDTO.setCorrect(a.isCorrect());
-            ansDTO.setGrade(a.getGrade());
+            ansDTO.setGrade(a.getManualGrade());
             return ansDTO;
         }).toList();
 

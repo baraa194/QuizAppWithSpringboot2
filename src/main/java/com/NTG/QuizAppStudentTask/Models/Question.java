@@ -21,7 +21,8 @@ public class Question extends AuditableEntity{
     private int Id;
     @Column(name="ques_text", length=500)
     private String  text ;
-
+    @Column(nullable=false,length=500)
+    private String modelAnswer;
     @Column(nullable=false)
     private int Grade ;
 

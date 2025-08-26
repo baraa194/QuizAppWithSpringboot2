@@ -78,7 +78,7 @@ public class SubmissionService {
                                 .anyMatch(opt -> opt.isCorrect() && opt.getId() == reqdto.getSelectedOptionId());
 
                         subanswer.setCorrect(isCorrect);
-                        subanswer.setGrade(isCorrect ? question.getGrade() : 0);
+                        subanswer.setManualGrade(isCorrect ? question.getGrade() : 0);
                     }// written question
                     else if (question.getQuestionType() == Question.QuestionType.WRITTEN) {
 
@@ -91,11 +91,11 @@ public class SubmissionService {
                             double scorePercent = gradingService.gradeAnswer(studentAns, modelAns);
                             System.out.println("ScorePercent: " + scorePercent);
                             float score = (float) ((scorePercent / 100.0) * question.getGrade());
-                            subanswer.setGrade(score);
+                            subanswer.setManualGrade(score);
                             subanswer.setCorrect(scorePercent >= 70);
                         }
                         catch (IOException e) {
-                            subanswer.setGrade(0);
+                            subanswer.setManualGrade(0);
                             subanswer.setCorrect(false);
                             e.printStackTrace();
                         }
@@ -110,7 +110,7 @@ public class SubmissionService {
         //  calculate total grade
 
         float totalGrade = (int) submissionAnswers.stream()
-                .mapToDouble(SubmissionAnswer::getGrade)
+                .mapToDouble(SubmissionAnswer::getManualGrade)
                 .sum();
         submission.setTotalGrade(totalGrade);
         submissionRepo.save(submission);
@@ -143,13 +143,13 @@ public class SubmissionService {
                 .findBySubmissionAndQuestionId(submission, (long)questionId)
                 .orElseThrow(() -> new RuntimeException("SubmissionAnswer not found for this question"));
 
-        submissionAnswer.setGrade(newGrade);
+        submissionAnswer.setManualGrade(newGrade);
         submissionAnswer.setCorrect(newGrade > 0);
         submissionAnswerRepo.save(submissionAnswer);
 
         float totalGrade = (float) submission.getSubmissionAnswers()
                 .stream()
-                .mapToDouble(SubmissionAnswer::getGrade)
+                .mapToDouble(SubmissionAnswer::getManualGrade)
                 .sum();
         submission.setTotalGrade(totalGrade);
 

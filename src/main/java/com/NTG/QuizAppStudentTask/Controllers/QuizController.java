@@ -29,12 +29,12 @@ private  QuizService quizService;
        quizService.createQuizWithQuestions(quiz);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
-    @PutMapping("/td/quiz/update/{id}")
-    public ResponseEntity<QuizDTO> updateQuiz(@PathVariable int id,@RequestBody QuizDTO quiz)
-    {
-        return new ResponseEntity<>(quizService.updateQuiz(id,quiz), HttpStatus.OK);
-    }
+//    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
+//    @PutMapping("/td/quiz/update/{id}")
+//    public ResponseEntity<QuizDTO> updateQuiz(@PathVariable int id,@RequestBody QuizDTO quiz)
+//    {
+//        return new ResponseEntity<>(quizService.updateQuiz(id,quiz), HttpStatus.OK);
+//    }
 
     @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
     @DeleteMapping("/td/quiz/delete/{id}")

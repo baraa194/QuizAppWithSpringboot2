@@ -43,10 +43,7 @@ public class QuestionService {
         return questions.stream()
                 .map(q -> new QuestionStudentDTO(
                         q.getText(),
-                        q.getOptionA(),
-                        q.getOptionB(),
-                        q.getOptionC(),
-                        q.getOptionD(),
+                        q.getOptions(),
                         q.getQuestionType().name(),
                         q.getGrade()
                 ))
@@ -167,14 +164,15 @@ public class QuestionService {
         Question saved = questionRepo.save(question);
 
         // Build DTO to return (بدون id)
-        return new QuestionDTO(
-                saved.getText(),
-                saved.getOptions().stream()
-                        .map(opt -> new OptionDTO(opt.isCorrect(), opt.getAnswer()))
-                        .collect(Collectors.toList()),
-                saved.getQuestionType().name(),
-                saved.getGrade()
-        );
+        QuestionDTO resultQuestionDTO=new QuestionDTO();
+        resultQuestionDTO.setText(saved.getText());
+        resultQuestionDTO.setGrade(saved.getGrade());
+        resultQuestionDTO.setModelAnswer(saved.getModelAnswer());
+        resultQuestionDTO.setType(saved.getQuestionType().name());
+        resultQuestionDTO.setOptions(saved.getOptions().stream()
+                .map(opt -> new OptionDTO(opt.isCorrect(), opt.getAnswer()))
+                .collect(Collectors.toList()));
+        return resultQuestionDTO;
     }
 
     /** Update a question in a quiz */
@@ -211,7 +209,8 @@ public class QuestionService {
                         .map(opt -> new OptionDTO(opt.isCorrect(), opt.getAnswer()))
                         .collect(Collectors.toList()),
                 updated.getQuestionType().name(),
-                updated.getGrade()
+                updated.getGrade(),
+                updated.getModelAnswer()
         );
     }
 
