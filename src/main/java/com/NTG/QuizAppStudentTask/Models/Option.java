@@ -1,5 +1,6 @@
 package com.NTG.QuizAppStudentTask.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,5 +24,6 @@ public class Option {
 
     @ManyToOne
     @JoinColumn(name = "question_id", nullable = false)
+    @JsonBackReference
     private Question question;
 }

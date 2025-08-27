@@ -70,6 +70,7 @@ public class SubmissionService {
                     subanswer.setStudentAnswer(reqdto.getStudentAnswer());
                     Question question = questionRepo.findById(reqdto.getQuestionId())
                             .orElseThrow(() -> new RuntimeException("Question not found"));
+
                     subanswer.setQuestion(question);
 
                     // Auto grading based on options
