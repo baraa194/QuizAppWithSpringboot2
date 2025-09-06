@@ -30,4 +30,11 @@ public interface SubmissionRepo extends JpaRepository<Submission,Integer> {
             "JOIN sub.student st " +
             "WHERE sub.quiz.Id = :quizId")
     List<SubmissionSummaryDTO> findSubmissionsByQuizId(@Param("quizId") int quizId);
+
+    @Query("""
+        select s from Submission s
+        join fetch s.quiz q
+        where s.student.Id = :studentId
+    """)
+    List<Submission> findAllByStudentIdWithQuiz(@Param("studentId") int studentId);
 }

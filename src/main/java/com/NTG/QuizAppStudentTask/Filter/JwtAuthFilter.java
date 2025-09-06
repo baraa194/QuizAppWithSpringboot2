@@ -1,4 +1,5 @@
 package com.NTG.QuizAppStudentTask.Filter;
+
 import com.NTG.QuizAppStudentTask.Services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,6 +24,7 @@ import java.util.List;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+
     @Autowired
     private JwtService jwtService;
 
@@ -37,7 +39,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         System.out.println("🌐 Request path: " + path);
 
-        // Skip /auth/** endpoints
+
         if (path.startsWith("/auth")) {
             chain.doFilter(request, response);
             return;
@@ -46,22 +48,34 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"Please provide a valid token\"}");
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Please provide a valid token\"}");
             return;
         }
 
         try {
             String token = authHeader.substring(7);
             String username = jwtService.extractUsername(token);
-            String roleFromToken = jwtService.extractRole(token); // الدور من التوكن
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (jwtService.validateToken(token, userDetails)) {
-                    // ✅ تعديل الـ role ليصبح متوافق مع Spring Security
-                    String formattedRole = "ROLE_" + roleFromToken.toUpperCase();
-                    Collection<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(formattedRole));
+
+
+                    String roleFromToken = null;
+                    try {
+                        roleFromToken = jwtService.extractRole(token);
+                    } catch (Exception ignored) {}
+
+                    String formattedRole = "ROLE_USER";
+                    if (roleFromToken != null && !roleFromToken.isBlank()) {
+                        String up = roleFromToken.trim().toUpperCase();
+                        formattedRole = up.startsWith("ROLE_") ? up : "ROLE_" + up;
+                    }
+
+                    Collection<GrantedAuthority> authorities =
+                            List.of(new SimpleGrantedAuthority(formattedRole));
 
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
@@ -70,10 +84,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                    System.out.println("🎯 User authenticated successfully: " + username + " with authorities: " + auth.getAuthorities());
+                    System.out.println("🎯 User authenticated: " + username + " | authorities: " + auth.getAuthorities());
                 } else {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("{\"error\": \"Invalid token\"}");
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Invalid token\"}");
                     return;
                 }
             }
@@ -82,11 +97,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"Authentication failed: " + e.getMessage() + "\"}");
+            response.setContentType("application/json");
+            String msg = e.getMessage() == null ? "unknown" : e.getMessage().replace("\"","\\\"");
+            response.getWriter().write("{\"error\":\"Authentication failed: " + msg + "\"}");
         }
-
     }
 }
+
 
 
 

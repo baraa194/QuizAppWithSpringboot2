@@ -9,10 +9,8 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubmissionAnswerResponse {
-    private int questionId;
-    private String studentAnswer;
-    private boolean isCorrect;
-    private String questionText;
-    private float grade;
+
+public class StudentOptionDTO {
+    private int id;
+    private String text;
 }

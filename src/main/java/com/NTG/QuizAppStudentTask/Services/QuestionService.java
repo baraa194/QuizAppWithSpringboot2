@@ -38,7 +38,7 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
-    public List<QuestionStudentDTO> findQuesForStudent(Integer quizId) {
+   /* public List<QuestionStudentDTO> findQuesForStudent(Integer quizId) {
         List<Question> questions = questionRepo.findByQuizId(quizId);
         return questions.stream()
                 .map(q -> new QuestionStudentDTO(
@@ -49,7 +49,7 @@ public class QuestionService {
                 ))
                 .collect(Collectors.toList());
 
-    }
+    }*/
 
 
    /* public QuestionDTO addQuestion(int quizId, QuestionDTO questionDTO) {
@@ -149,7 +149,7 @@ public class QuestionService {
         question.setGrade(questionDTO.getGrade());
         question.setQuiz(quiz);
 
-        // Map OptionDTOs to Options (بدون id)
+
         List<Option> options = questionDTO.getOptions().stream()
                 .map(optDto -> {
                     Option opt = new Option();
@@ -163,7 +163,7 @@ public class QuestionService {
 
         Question saved = questionRepo.save(question);
 
-        // Build DTO to return (بدون id)
+
         QuestionDTO resultQuestionDTO=new QuestionDTO();
         resultQuestionDTO.setText(saved.getText());
         resultQuestionDTO.setGrade(saved.getGrade());
@@ -189,7 +189,7 @@ public class QuestionService {
         question.setQuestionType(Question.QuestionType.valueOf(dto.getType()));
         question.setGrade(dto.getGrade());
 
-        // Update options (رجع answer مع isCorrect)
+
         List<Option> updatedOptions = dto.getOptions().stream()
                 .map(optDto -> {
                     Option opt = new Option();

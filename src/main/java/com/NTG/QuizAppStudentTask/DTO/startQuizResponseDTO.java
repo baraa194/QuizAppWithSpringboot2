@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -15,8 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 
 public class startQuizResponseDTO {
-    private int submissionId;
+    private Integer submissionId;
     private LocalDateTime endTime;
     private String quiztitle;
-    private List<QuestionStudentDTO> questions;
+    private List<QuestionStudentDTO> questions = new ArrayList<>();
 }

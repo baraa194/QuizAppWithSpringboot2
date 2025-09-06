@@ -26,6 +26,11 @@ public class Quiz extends AuditableEntity {
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime ;
+    @Column(
+            nullable = false,
+            columnDefinition = "boolean NOT NULL DEFAULT false"
+    )
+    private boolean published = false;
 
     public enum Status {
         SCHEDULED,

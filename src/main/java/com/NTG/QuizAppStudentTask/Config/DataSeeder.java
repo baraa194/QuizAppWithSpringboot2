@@ -12,7 +12,7 @@ import com.NTG.QuizAppStudentTask.Repositories.RoleRepo;
 
 @Configuration
 public class DataSeeder {
-
+/*
     private final userRepo UserRepo;
     private final RoleRepo roleRepo;
     private final PasswordEncoder passwordEncoder;
@@ -47,5 +47,5 @@ public class DataSeeder {
                 System.out.println("✅ Admin user seeded!");
             }
         };
-    }
+    }*/
 }

@@ -15,7 +15,7 @@ import java.util.List;
 public class AutoSubmitScheduler {
     private final SubmissionRepo submissionRepo;
 
-    @Scheduled(fixedRate = 60_000) // كل دقيقة
+    @Scheduled(fixedRate = 60_000)
     @Transactional
     public void autoSubmitExpired() {
         LocalDateTime now = LocalDateTime.now();
@@ -23,8 +23,8 @@ public class AutoSubmitScheduler {
 
         for (Submission s : expired) {
             s.setAutoSubmitted(true);
-            s.setSubmittedAt(s.getDeadline()); // قفلناها عند الديدلاين
-            // مفيش إجابات إضافية لو انتي مش عاملة progressive save
+            s.setSubmittedAt(s.getDeadline());
+
             submissionRepo.save(s);
         }
     }

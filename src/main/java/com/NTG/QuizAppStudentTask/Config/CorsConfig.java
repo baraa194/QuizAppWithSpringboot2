@@ -9,14 +9,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class CorsConfig {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")   // Apply to all APIs
-                        .allowedOrigins("http://localhost:4200") // Angular dev server
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowCredentials(true);
-            }
-        };
+
+            return new WebMvcConfigurer() {
+                @Override
+                public void addCorsMappings(CorsRegistry registry) {
+                    registry.addMapping("/**")
+                            // أو "/quiz/**" لو عايزة تدقيها
+                            .allowedOrigins("http://localhost:4200")
+                            .allowedMethods("GET","POST","PUT","PATCH","DELETE","OPTIONS")
+                            .allowedHeaders("Authorization","Content-Type","Accept","Origin","X-Requested-With")
+                            .allowCredentials(true)
+                            .maxAge(3600);
+                }
+            };
     }
 }

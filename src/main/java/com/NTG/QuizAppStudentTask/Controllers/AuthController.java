@@ -47,10 +47,10 @@ public class AuthController {
             // Load user details
             final UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
             if (user != null) {
-                // Generate JWT token
+
                 String token = jwtService.generateToken(user);
 
-                // 🟢 استخرج الـ role (لو UserDetailsImpl عندك فيه roleId أو roleName)
+
                 String role = user.getAuthorities()
                         .stream()
                         .findFirst()

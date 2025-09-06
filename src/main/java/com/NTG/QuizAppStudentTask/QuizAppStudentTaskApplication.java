@@ -15,7 +15,7 @@ public class QuizAppStudentTaskApplication {
 	public static void main(String[] args){ SpringApplication.run(QuizAppStudentTaskApplication.class, args);
 
 
-		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		/*PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 		String rawPassword = "admin123";
 		String encodedPassword = passwordEncoder.encode(rawPassword);
@@ -23,9 +23,9 @@ public class QuizAppStudentTaskApplication {
 		System.out.println("Raw Password: " + rawPassword);
 		System.out.println("Encoded Password: " + encodedPassword);
 
-		// للتحقق
+
 		boolean matches = passwordEncoder.matches("admin123", encodedPassword);
-		System.out.println("Password matches: " + matches);
+		System.out.println("Password matches: " + matches);*/
 	}
 
 }

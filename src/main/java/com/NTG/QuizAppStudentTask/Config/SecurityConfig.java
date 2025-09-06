@@ -11,18 +11,19 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -40,12 +41,20 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
+    @Bean
+    public GrantedAuthoritiesMapper authoritiesMapper() {
+        return authorities -> authorities.stream()
+                .map(a -> {
+                    String name = a.getAuthority();
+                    if (!name.startsWith("ROLE_")) name = "ROLE_" + name;
+                    return new SimpleGrantedAuthority(name);
+                })
+                .collect(Collectors.toSet());
+    }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -54,8 +63,6 @@ public class SecurityConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -70,32 +77,28 @@ public class SecurityConfig {
         return source;
     }
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return NoOpPasswordEncoder.getInstance();
-//    }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/teacher/**").hasRole("TEACHER")
                         .requestMatchers("/student/**").hasRole("STUDENT")
+                        //.requestMatchers("/quiz/td/quiz/create").permitAll()
                         .requestMatchers("/quiz/td/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers("/quiz/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
 }
+
 
 
