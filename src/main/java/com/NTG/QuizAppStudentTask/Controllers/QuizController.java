@@ -7,6 +7,7 @@ import com.NTG.QuizAppStudentTask.Services.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,53 +16,60 @@ import java.util.List;
 @RequestMapping("/quiz")
 
 
-
 public class QuizController {
     @Autowired
 private  QuizService quizService;
-    @GetMapping
+
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
+    @PostMapping("/td/quiz/create")
+    public ResponseEntity<QuizDTO> createQuiz(@RequestBody QuizDTO quiz){
+        return new ResponseEntity<>(quizService.createQuiz(quiz), HttpStatus.CREATED);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
+    @PutMapping("/td/quiz/update/{id}")
+    public ResponseEntity<QuizDTO> updateQuiz(@PathVariable int id,@RequestBody QuizDTO quiz)
+    {
+        return new ResponseEntity<>(quizService.updateQuiz(id,quiz), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
+    @DeleteMapping("/td/quiz/delete/{id}")
+    public void deleteQuiz(@PathVariable int id)
+    {
+        quizService.deleteQuiz(id);
+    }
+
+
+
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' , 'STUDENT')")
+    @GetMapping("/quiz/getall")
     public ResponseEntity<List<QuizDTO>> getQuizzes(){
 
         return new ResponseEntity<>(quizService.getAllWithStatus(), HttpStatus.OK);
 
+
     }
 
-    @GetMapping("/getbyId/{id}")
-    public ResponseEntity<QuizDTO> getQuizById(@RequestParam int id)
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' , 'STUDENT')")
+    @GetMapping("/quiz/getbyId/{id}")
+    public ResponseEntity<QuizDTO> getQuizById(@PathVariable int id)
     {
         return new ResponseEntity<>(quizService.getById(id), HttpStatus.OK);
     }
 
-    //create Quiz
-    @PostMapping("/create")
-    public ResponseEntity<QuizDTO> getQuizById(@RequestBody QuizDTO quiz)
+    @GetMapping("/quiz/getallquizzesResults")
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' , 'STUDENT')")
+    public ResponseEntity<?>  getAllQuizResults()
     {
-        return new ResponseEntity<>(quizService.createQuiz(quiz), HttpStatus.OK);
-    }
-    //get quizes of teacher
-    @GetMapping("/TeacherQuizes/{id}")
-    public ResponseEntity<List<QuizDTO>> getAllQuizes(@PathVariable int id){
-        return new ResponseEntity<>(quizService.getTeacherQuizzes(id), HttpStatus.OK);
+        return new ResponseEntity<>(quizService.getAllResults(), HttpStatus.OK);
     }
 
-    //update on quiz
-    @PutMapping("/updateQuiz/{id}")
-    public ResponseEntity<QuizDTO> updateQuiz(@PathVariable int id,@RequestBody QuizDTO quizDTO){
-        return new ResponseEntity<>(quizService.updateQuiz(id,quizDTO), HttpStatus.OK);
-    }
-
-    //delete quiz from teacher
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteQuiz(@PathVariable int id) {
-        quizService.deleteQuiz(id);
-        return ResponseEntity.ok("Quiz deleted successfully");
-    }
-
-    //publish quiz
-    @PutMapping("/publish/{id}")
-    public ResponseEntity<String>  publishQuiz(@PathVariable int id){
-        quizService.publishQuiz(id);
-        return ResponseEntity.ok("Quiz published successfully");
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' )")
+    @GetMapping("/td/quiz/getteacherquizById/{quizid}/{teacherid}")
+    public ResponseEntity<?> getTeacherQuizById(@PathVariable int id,@PathVariable int teacherid)
+    {
+        return new ResponseEntity<>(quizService.getteacherQuizById(id,teacherid), HttpStatus.OK);
     }
 
 

@@ -1,4 +1,5 @@
-package com.NTG.QuizAppStudentTask.Auth;
+package com.NTG.QuizAppStudentTask.DTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class AuthRequest {
     private  String username;
     private  String password;
-
 }

@@ -19,7 +19,7 @@ public class Role extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int Id;
-    @Column(nullable = true,length = 50)
+    @Column(nullable = false,length = 50)
     private String role;
 
     @OneToMany(mappedBy="role")

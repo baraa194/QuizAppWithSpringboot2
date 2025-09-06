@@ -26,7 +26,7 @@ public abstract class AuditableEntity {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(name = "created_by")
     private Integer createdBy;
 
     @Column(name = "updated_by")
@@ -37,21 +37,10 @@ public abstract class AuditableEntity {
         createdAt = LocalDateTime.now();
         isActive = true;
         isDeleted = false;
-
-        if (createdBy == null) {
-            createdBy = getCurrentUserId();
-        }
-    }
-
-    private Integer getCurrentUserId() {
-        return 0;
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-        if (createdBy == null) {
-            createdBy = getCurrentUserId();
-        }
     }
 }

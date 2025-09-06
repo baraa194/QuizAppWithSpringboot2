@@ -1,5 +1,4 @@
 package com.NTG.QuizAppStudentTask.Filter;
-
 import com.NTG.QuizAppStudentTask.Services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,35 +29,77 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String username;
+        String path = request.getServletPath();
+        System.out.println("🌐 Request path: " + path);
 
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (path.startsWith("/auth")) {
+            System.out.println(" Skipping JWT check for auth endpoint");
             chain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        username = jwtService.extractUsername(jwt);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+        String authHeader = request.getHeader("Authorization");
+        System.out.println("🔑 Authorization header: " + authHeader);
 
-            if (jwtService.validateToken(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                System.out.println(">>> Token is NOT valid!");
-            }
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("❌ No token or invalid format");
+            response.setStatus(401);
+            response.getWriter().write("{\"error\": \"Please provide a valid token\"}");
+            return;
         }
 
-        chain.doFilter(request, response);
+        try {
+
+            String token = authHeader.substring(7);
+            System.out.println("🎫 Token: " + token);
+
+
+            String username = jwtService.extractUsername(token);
+            System.out.println("👤 Username from token: " + username);
+
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                System.out.println("📋 User roles: " + userDetails.getAuthorities());
+
+
+                if (jwtService.validateToken(token, userDetails)) {
+                    System.out.println("✅ Token is valid");
+
+
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    System.out.println("🎯 User authenticated successfully: " + username);
+
+                } else {
+                    System.out.println("❌ Token is invalid");
+                    response.setStatus(401);
+                    response.getWriter().write("{\"error\": \"Invalid token\"}");
+                    return;
+                }
+            }
+
+
+            chain.doFilter(request, response);
+
+        } catch (Exception e) {
+            System.out.println("💥 Error in JWT filter: " + e.getMessage());
+            e.printStackTrace();
+            response.setStatus(401);
+            response.getWriter().write("{\"error\": \"Authentication failed: " + e.getMessage() + "\"}");
+        }
     }
 }
-
